@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Heart, ArrowLeft, DollarSign, Plus, Edit3, TrendingUp, TrendingDown } from 'lucide-react';
+import { Heart, DollarSign, Plus, Edit3, TrendingUp, TrendingDown } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { BudgetItem } from '../../types';
+import BackButton from '../common/BackButton';
 
 export default function BudgetPage() {
   const { state, dispatch } = useApp();
@@ -54,12 +55,7 @@ export default function BudgetPage() {
       <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <button
-              onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'dashboard' })}
-              className="p-2 text-gray-600 hover:text-gray-800"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </button>
+            <BackButton />
             <div className="flex items-center space-x-2">
               <Heart className="h-8 w-8 text-primary-500" />
               <span className="text-2xl font-serif font-semibold text-gray-800">Budget Tracker</span>
