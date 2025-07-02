@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Heart, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { useGemini } from '../hooks/useGemini';
+import { useDeepseek } from '../hooks/useDeepseek';
 import { StyleProfile } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 export default function StyleQuiz() {
   const { state, dispatch } = useApp();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Partial<StyleProfile>>({});
   const [isGeneratingProfile, setIsGeneratingProfile] = useState(false);
 
-  const { generateVisionBoard } = useGemini({
+  const { generateVisionBoard } = useDeepseek({
     onSuccess: (data) => {
       console.log('Generated enhanced style profile:', data);
     },
@@ -121,7 +123,7 @@ export default function StyleQuiz() {
         };
         
         dispatch({ type: 'SET_USER', payload: updatedUser });
-        dispatch({ type: 'SET_CURRENT_PAGE', payload: 'dashboard' });
+        navigate('/dashboard');
       } catch (error) {
         console.error('Failed to enhance profile with AI:', error);
         // Fallback to basic profile without AI enhancement
@@ -131,7 +133,7 @@ export default function StyleQuiz() {
         };
         
         dispatch({ type: 'SET_USER', payload: updatedUser });
-        dispatch({ type: 'SET_CURRENT_PAGE', payload: 'dashboard' });
+        navigate('/dashboard');
       } finally {
         setIsGeneratingProfile(false);
       }
@@ -173,7 +175,7 @@ export default function StyleQuiz() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <button
-                onClick={() => currentStep > 0 ? setCurrentStep(currentStep - 1) : dispatch({ type: 'SET_CURRENT_PAGE', payload: 'signup' })}
+                onClick={() => currentStep > 0 ? setCurrentStep(currentStep - 1) : navigate('/signup')}
                 className="p-2 text-gray-600 hover:text-gray-800"
               >
                 <ArrowLeft className="h-6 w-6" />

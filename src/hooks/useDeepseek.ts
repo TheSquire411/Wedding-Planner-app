@@ -1,19 +1,19 @@
 import { useState, useCallback } from 'react';
-import { geminiService } from '../services/geminiService';
+import { deepseekService } from '../services/deepseekService';
 
-interface UseGeminiOptions {
+interface UseDeepseekOptions {
   onSuccess?: (data: any) => void;
   onError?: (error: string) => void;
   autoRetry?: boolean;
 }
 
-export function useGemini(options: UseGeminiOptions = {}) {
+export function useDeepseek(options: UseDeepseekOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
 
   const execute = useCallback(async (
-    method: keyof typeof geminiService,
+    method: keyof typeof deepseekService,
     ...args: any[]
   ) => {
     setLoading(true);
@@ -21,7 +21,7 @@ export function useGemini(options: UseGeminiOptions = {}) {
 
     try {
       // Type assertion to handle the method call
-      const result = await (geminiService[method] as any)(...args);
+      const result = await (deepseekService[method] as any)(...args);
 
       if (result.success) {
         setData(result.data);
@@ -34,7 +34,7 @@ export function useGemini(options: UseGeminiOptions = {}) {
         return null;
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to execute Gemini request';
+      const errorMessage = err.message || 'Failed to execute Deepseek request';
       setError(errorMessage);
       options.onError?.(errorMessage);
       return null;
@@ -79,6 +79,6 @@ export function useGemini(options: UseGeminiOptions = {}) {
     analyzeImage,
     generateChatResponse,
     reset,
-    isReady: geminiService.isReady()
+    isReady: deepseekService.isReady()
   };
 }

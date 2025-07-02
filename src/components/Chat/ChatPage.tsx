@@ -1,13 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Heart, ArrowLeft, Send, Bot, User } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { useDeepseek } from '../../hooks/useDeepseek';
 import { ChatMessage } from '../../types';
+import { Link } from 'react-router-dom';
 
 export default function ChatPage() {
   const { state, dispatch } = useApp();
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const { generateChatResponse } = useDeepseek({
+    onSuccess: (data) => {
+      console.log('Chat response generated:', data);
+    },
+    onError: (error) => {
+      console.error('Failed to generate chat response:', error);
+    }
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -22,7 +33,7 @@ export default function ChatPage() {
     if (state.chatMessages.length === 0) {
       const welcomeMessage: ChatMessage = {
         id: Date.now().toString(),
-        message: `Hi ${state.user?.name}! I'm your AI wedding planning assistant. I can help you with vendor recommendations, timeline planning, budget advice, and answer any wedding-related questions you might have. What would you like to know?`,
+        message: `Hi ${state.user?.name}! I'm your AI wedding planning assistant powered by Deepseek. I can help you with vendor recommendations, timeline planning, budget advice, and answer any wedding-related questions you might have. What would you like to know?`,
         sender: 'ai',
         timestamp: new Date()
       };
@@ -30,7 +41,30 @@ export default function ChatPage() {
     }
   }, [dispatch, state.chatMessages.length, state.user?.name]);
 
-  const getAIResponse = (message: string): string => {
+  const getAIResponse = async (message: string): Promise<string> => {
+    try {
+      const userContext = {
+        name: state.user?.name,
+        weddingDate: state.user?.weddingDate,
+        styleProfile: state.user?.styleProfile,
+        recentActivity: 'Using chat assistant'
+      };
+
+      const response = await generateChatResponse(message, userContext);
+      
+      if (response && response.response) {
+        return response.response;
+      }
+      
+      // Fallback response if AI fails
+      return getFallbackResponse(message);
+    } catch (error) {
+      console.error('AI response failed:', error);
+      return getFallbackResponse(message);
+    }
+  };
+
+  const getFallbackResponse = (message: string): string => {
     const lowerMessage = message.toLowerCase();
     
     if (lowerMessage.includes('budget') || lowerMessage.includes('cost') || lowerMessage.includes('price')) {
@@ -58,7 +92,7 @@ export default function ChatPage() {
     }
     
     // Default response
-    return `That's a great question! As your AI wedding assistant, I'm here to help with all aspects of your ${state.user?.styleProfile?.style} wedding planning. I can provide advice on budgeting, vendor selection, timelines, and more. Could you be more specific about what you'd like help with?`;
+    return `That's a great question! As your AI wedding assistant powered by Deepseek, I'm here to help with all aspects of your ${state.user?.styleProfile?.style} wedding planning. I can provide advice on budgeting, vendor selection, timelines, and more. Could you be more specific about what you'd like help with?`;
   };
 
   const handleSendMessage = async () => {
@@ -73,20 +107,32 @@ export default function ChatPage() {
     };
     dispatch({ type: 'ADD_CHAT_MESSAGE', payload: userMessage });
 
+    const currentMessage = inputMessage;
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
+    try {
+      const aiResponseText = await getAIResponse(currentMessage);
+      
       const aiResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        message: getAIResponse(inputMessage),
+        message: aiResponseText,
         sender: 'ai',
         timestamp: new Date()
       };
       dispatch({ type: 'ADD_CHAT_MESSAGE', payload: aiResponse });
+    } catch (error) {
+      console.error('Failed to get AI response:', error);
+      const errorResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        message: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment, or feel free to ask me anything about wedding planning!",
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      dispatch({ type: 'ADD_CHAT_MESSAGE', payload: errorResponse });
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -102,12 +148,12 @@ export default function ChatPage() {
       <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <button
-              onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'dashboard' })}
+            <Link
+              to="/dashboard"
               className="p-2 text-gray-600 hover:text-gray-800"
             >
               <ArrowLeft className="h-6 w-6" />
-            </button>
+            </Link>
             <div className="flex items-center space-x-2">
               <Heart className="h-8 w-8 text-primary-500" />
               <span className="text-2xl font-serif font-semibold text-gray-800">AI Wedding Assistant</span>
@@ -125,7 +171,7 @@ export default function ChatPage() {
               <Bot className="h-8 w-8 text-white" />
               <div>
                 <h3 className="text-xl font-semibold text-white">Wedding Planning Assistant</h3>
-                <p className="text-primary-100 text-sm">Ask me anything about your wedding!</p>
+                <p className="text-primary-100 text-sm">Powered by Deepseek AI - Ask me anything about your wedding!</p>
               </div>
             </div>
           </div>

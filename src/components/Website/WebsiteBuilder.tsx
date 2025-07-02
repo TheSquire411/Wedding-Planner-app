@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Palette, Type, Image, MapPin, Calendar, Gift, Plane, Sparkles, Save, Upload, Plus, Trash2, Edit3 } from 'lucide-react';
+import { useDeepseek } from '../../hooks/useDeepseek';
 
 interface WebsiteBuilderProps {
   websiteData: any;
@@ -11,6 +12,17 @@ interface WebsiteBuilderProps {
 export default function WebsiteBuilder({ websiteData, onUpdate, onGenerateStory, isGenerating }: WebsiteBuilderProps) {
   const [activeSection, setActiveSection] = useState<'theme' | 'content' | 'photos' | 'details'>('theme');
   const [showCustomCSS, setShowCustomCSS] = useState(false);
+
+  const { generateStory } = useDeepseek({
+    onSuccess: (data) => {
+      if (data && data.story) {
+        updateContent('ourStory', { content: data.story });
+      }
+    },
+    onError: (error) => {
+      console.error('Failed to generate story:', error);
+    }
+  });
 
   const updateContent = (section: string, updates: any) => {
     onUpdate({
@@ -31,6 +43,24 @@ export default function WebsiteBuilder({ websiteData, onUpdate, onGenerateStory,
         ...updates
       }
     });
+  };
+
+  const handleGenerateStory = async (style: 'romantic' | 'casual' | 'formal') => {
+    try {
+      const coupleInfo = {
+        names: websiteData.content.coupleNames || 'The Happy Couple',
+        style,
+        weddingDate: websiteData.content.weddingDate,
+        venue: websiteData.content.venue?.name,
+        additionalInfo: 'A beautiful love story'
+      };
+
+      await generateStory(coupleInfo);
+    } catch (error) {
+      console.error('Failed to generate story:', error);
+      // Fallback to the original method
+      onGenerateStory(style);
+    }
   };
 
   const addAccommodation = () => {
@@ -233,7 +263,7 @@ export default function WebsiteBuilder({ websiteData, onUpdate, onGenerateStory,
                   <option value="formal">Formal</option>
                 </select>
                 <button
-                  onClick={() => onGenerateStory(websiteData.content.ourStory.style)}
+                  onClick={() => handleGenerateStory(websiteData.content.ourStory.style)}
                   disabled={isGenerating}
                   className="flex items-center space-x-2 px-3 py-1 bg-primary-500 text-white rounded text-sm hover:bg-primary-600 disabled:opacity-50"
                 >
