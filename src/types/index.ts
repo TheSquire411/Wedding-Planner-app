@@ -8,6 +8,7 @@ export interface User {
   weddingDate?: string;
   partner?: string;
   styleProfile?: StyleProfile;
+  tier?: 'free' | 'pro';
 }
 
 /**

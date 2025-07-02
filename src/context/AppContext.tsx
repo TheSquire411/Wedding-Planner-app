@@ -11,6 +11,7 @@ interface AppState {
 
 type AppAction =
   | { type: 'SET_USER'; payload: User | null }
+  | { type: 'UPGRADE_USER_TIER' }
   | { type: 'TOGGLE_CHECKLIST_ITEM'; payload: string }
   | { type: 'ADD_BUDGET_ITEM'; payload: BudgetItem }
   | { type: 'UPDATE_BUDGET_ITEM'; payload: BudgetItem }
@@ -38,6 +39,11 @@ function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_USER':
       return { ...state, user: action.payload };
+    case 'UPGRADE_USER_TIER':
+      return {
+        ...state,
+        user: state.user ? { ...state.user, tier: 'pro' } : null
+      };
     case 'TOGGLE_CHECKLIST_ITEM':
       return {
         ...state,
