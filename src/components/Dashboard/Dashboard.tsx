@@ -3,35 +3,30 @@ import { Heart, Calendar, DollarSign, CheckSquare, MessageCircle, User, LogOut, 
 import { useApp } from '../../context/AppContext';
 import { defaultChecklist } from '../../data/checklistData';
 import { defaultBudgetCategories } from '../../data/budgetData';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const { state, dispatch } = useApp();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Initialize default data
-    const checklistWithIds = defaultChecklist.map(item => ({ ...item, id: Date.now().toString() + Math.random().toString() }));
-    const budgetWithIds = defaultBudgetCategories.map((item, index) => ({ 
-      ...item, 
-      id: (Date.now() + index).toString(),
+    if (!state.user) return;
+    const checklistWithIds = defaultChecklist.map(item => ({ ...item, id: `${Date.now()}-${Math.random()}` }));
+    const budgetWithIds = defaultBudgetCategories.map((item, index) => ({
+      ...item,
+      id: `${Date.now()}-${index}`,
       budgeted: state.user?.styleProfile ? Math.floor(state.user.styleProfile.budget * getBudgetPercentage(item.category)) : 0
     }));
-    
+
     dispatch({ type: 'INITIALIZE_CHECKLIST', payload: checklistWithIds });
     dispatch({ type: 'INITIALIZE_BUDGET', payload: budgetWithIds });
   }, [dispatch, state.user]);
 
   const getBudgetPercentage = (category: string): number => {
     const percentages: { [key: string]: number } = {
-      'Venue': 0.40,
-      'Catering': 0.25,
-      'Photography': 0.12,
-      'Flowers': 0.08,
-      'Music/DJ': 0.05,
-      'Dress & Attire': 0.05,
-      'Transportation': 0.02,
-      'Decorations': 0.02,
-      'Stationery': 0.01,
-      'Miscellaneous': 0.05
+      'Venue': 0.40, 'Catering': 0.25, 'Photography': 0.12, 'Flowers': 0.08,
+      'Music/DJ': 0.05, 'Dress & Attire': 0.05, 'Transportation': 0.02,
+      'Decorations': 0.02, 'Stationery': 0.01, 'Miscellaneous': 0.05
     };
     return percentages[category] || 0.05;
   };
@@ -41,18 +36,22 @@ export default function Dashboard() {
   const totalSpent = state.budget.reduce((sum, item) => sum + item.spent, 0);
 
   const menuItems = [
-    { icon: Calendar, label: 'Planning', page: 'planning' },
-    { icon: DollarSign, label: 'Budget', page: 'budget' },
-    { icon: Palette, label: 'Vision Board', page: 'vision-board' },
-    { icon: Globe, label: 'Website', page: 'website' },
-    { icon: MessageCircle, label: 'AI Assistant', page: 'chat' },
+    { icon: Calendar, label: 'Planning', page: '/planning' },
+    { icon: DollarSign, label: 'Budget', page: '/budget' },
+    { icon: Palette, label: 'Vision Board', page: '/vision-board' },
+    { icon: Globe, label: 'Website', page: '/website' },
+    { icon: MessageCircle, label: 'AI Assistant', page: '/chat' },
   ];
+
+  const handleSignOut = () => {
+    dispatch({ type: 'SET_USER', payload: null });
+    navigate('/');
+  };
 
   if (!state.user) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50">
-      {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -65,10 +64,7 @@ export default function Dashboard() {
               <span className="text-gray-700">{state.user.name}</span>
             </div>
             <button
-              onClick={() => {
-                dispatch({ type: 'SET_USER', payload: null });
-                dispatch({ type: 'SET_CURRENT_PAGE', payload: 'landing' });
-              }}
+              onClick={handleSignOut}
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
             >
               <LogOut className="h-5 w-5" />
@@ -79,7 +75,6 @@ export default function Dashboard() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold text-gray-800 mb-2">
             Welcome back, {state.user.name}!
@@ -131,14 +126,14 @@ export default function Dashboard() {
             <div className="text-sm text-gray-600">Stay on track!</div>
           </div>
         </div>
-
+        
         {/* Navigation Menu */}
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
           {menuItems.map((item, index) => (
-            <button
+            <Link
               key={index}
-              onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: item.page })}
-              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2 text-left"
+              to={item.page}
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2 text-left block"
             >
               <item.icon className="h-12 w-12 text-primary-500 mb-4" />
               <h3 className="text-xl font-semibold text-gray-800 mb-2">{item.label}</h3>
@@ -149,7 +144,7 @@ export default function Dashboard() {
                 {item.label === 'Website' && 'Build your wedding website with RSVP system'}
                 {item.label === 'AI Assistant' && 'Get instant answers to your wedding questions'}
               </p>
-            </button>
+            </Link>
           ))}
         </div>
       </div>

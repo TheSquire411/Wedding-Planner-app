@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Heart, ArrowLeft, Mail, Lock } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function LoginForm() {
   const { dispatch } = useApp();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -17,11 +19,11 @@ export default function LoginForm() {
       id: '1',
       name: 'Sarah Johnson',
       email: formData.email,
-      weddingDate: '2024-09-15',
+      weddingDate: '2025-09-15',
       partner: 'Michael',
       styleProfile: {
         style: 'Classic & Elegant',
-        colors: ['Blush Pink', 'Gold'],
+        colors: ['#F8BBD9', '#D4AF37'],
         season: 'Fall',
         venue: 'Garden',
         budget: 25000,
@@ -30,20 +32,20 @@ export default function LoginForm() {
     };
     
     dispatch({ type: 'SET_USER', payload: user });
-    dispatch({ type: 'SET_CURRENT_PAGE', payload: 'dashboard' });
+    navigate('/dashboard'); // Navigate to dashboard after login
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50 flex items-center justify-center px-6">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8 relative">
+          <Link
+            to="/"
+            className="absolute top-6 left-6 p-2 text-gray-600 hover:text-gray-800"
+          >
+            <ArrowLeft className="h-6 w-6" />
+          </Link>
           <div className="text-center mb-8">
-            <button
-              onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'landing' })}
-              className="absolute top-6 left-6 p-2 text-gray-600 hover:text-gray-800"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </button>
             <div className="flex items-center justify-center space-x-2 mb-4">
               <Heart className="h-8 w-8 text-primary-500" />
               <span className="text-2xl font-serif font-semibold text-gray-800">Blissful</span>
@@ -94,12 +96,12 @@ export default function LoginForm() {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Don't have an account?{' '}
-              <button
-                onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'signup' })}
+              <Link
+                to="/signup"
                 className="text-primary-500 hover:text-primary-600 font-semibold"
               >
                 Sign up
-              </button>
+              </Link>
             </p>
           </div>
         </div>

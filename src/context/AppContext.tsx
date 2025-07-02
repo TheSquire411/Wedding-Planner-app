@@ -1,32 +1,16 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { User, ChecklistItem, BudgetItem, ChatMessage } from '../types';
+import { User, ChecklistItem, BudgetItem, ChatMessage, GalleryImage } from '../types';
 
 interface AppState {
   user: User | null;
   checklist: ChecklistItem[];
   budget: BudgetItem[];
   chatMessages: ChatMessage[];
-  currentPage: string;
   inspirationImages: GalleryImage[];
 }
 
-interface GalleryImage {
-  id: string;
-  url: string;
-  thumbnail: string;
-  filename: string;
-  size: number;
-  category: string;
-  caption?: string;
-  tags: string[];
-  isFavorite: boolean;
-  uploadDate: Date;
-  notes?: string;
-}
-
-type AppAction = 
-  | { type: 'SET_USER'; payload: User }
-  | { type: 'SET_CURRENT_PAGE'; payload: string }
+type AppAction =
+  | { type: 'SET_USER'; payload: User | null }
   | { type: 'TOGGLE_CHECKLIST_ITEM'; payload: string }
   | { type: 'ADD_BUDGET_ITEM'; payload: BudgetItem }
   | { type: 'UPDATE_BUDGET_ITEM'; payload: BudgetItem }
@@ -42,7 +26,6 @@ const initialState: AppState = {
   checklist: [],
   budget: [],
   chatMessages: [],
-  currentPage: 'landing',
   inspirationImages: []
 };
 
@@ -55,8 +38,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_USER':
       return { ...state, user: action.payload };
-    case 'SET_CURRENT_PAGE':
-      return { ...state, currentPage: action.payload };
     case 'TOGGLE_CHECKLIST_ITEM':
       return {
         ...state,
@@ -115,5 +96,3 @@ export function useApp() {
   }
   return context;
 }
-
-export type { GalleryImage };

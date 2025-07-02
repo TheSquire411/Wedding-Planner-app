@@ -1,5 +1,8 @@
 import React from 'react';
+import { Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
+
+// Import all your page components
 import LandingPage from './components/LandingPage';
 import SignupForm from './components/Auth/SignupForm';
 import LoginForm from './components/Auth/LoginForm';
@@ -12,45 +15,62 @@ import VisionBoardPage from './components/VisionBoard/VisionBoardPage';
 import WebsitePage from './components/Website/WebsitePage';
 import GeminiTest from './components/GeminiTest';
 
-function AppContent() {
+/**
+ * A component to protect routes that require authentication.
+ * If the user is not logged in, it redirects them to the login page.
+ */
+function ProtectedRoute() {
   const { state } = useApp();
+  const location = useLocation();
 
-  const renderPage = () => {
-    switch (state.currentPage) {
-      case 'landing':
-        return <LandingPage />;
-      case 'signup':
-        return <SignupForm />;
-      case 'login':
-        return <LoginForm />;
-      case 'quiz':
-        return <StyleQuiz />;
-      case 'dashboard':
-        return <Dashboard />;
-      case 'planning':
-        return <PlanningPage />;
-      case 'budget':
-        return <BudgetPage />;
-      case 'chat':
-        return <ChatPage />;
-      case 'vision-board':
-        return <VisionBoardPage />;
-      case 'website':
-        return <WebsitePage />;
-      case 'gemini-test':
-        return <GeminiTest />;
-      default:
-        return <LandingPage />;
-    }
-  };
+  if (!state.user) {
+    // Redirect them to the /login page, but save the current location they were
+    // trying to go to. This allows us to send them along to that page after they
+    // log in, which is a nicer user experience.
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
-  return <div className="app">{renderPage()}</div>;
+  return <Outlet />; // Renders the child route's element
 }
 
+/**
+ * The main application component that sets up routing.
+ */
+function AppRoutes() {
+  return (
+    <div className="app">
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/signup" element={<SignupForm />} />
+
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/quiz" element={<StyleQuiz />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/planning" element={<PlanningPage />} />
+          <Route path="/budget" element={<BudgetPage />} />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/vision-board" element={<VisionBoardPage />} />
+          <Route path="/website" element={<WebsitePage />} />
+          <Route path="/gemini-test" element={<GeminiTest />} />
+        </Route>
+
+        {/* Fallback Route */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </div>
+  );
+}
+
+/**
+ * The root App component that wraps the application with the context provider.
+ */
 function App() {
   return (
     <AppProvider>
-      <AppContent />
+      <AppRoutes />
     </AppProvider>
   );
 }

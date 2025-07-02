@@ -1,36 +1,17 @@
 import React from 'react';
 import { Heart, Calendar, DollarSign, CheckSquare, MessageCircle, Sparkles } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import { Link } from 'react-router-dom';
 
 export default function LandingPage() {
-  const { dispatch } = useApp();
-
   const features = [
-    {
-      icon: Calendar,
-      title: 'Smart Planning Timeline',
-      description: 'Never miss a deadline with our AI-powered wedding timeline'
-    },
-    {
-      icon: DollarSign,
-      title: 'Budget Tracker',
-      description: 'Keep your wedding costs under control with detailed budget management'
-    },
-    {
-      icon: CheckSquare,
-      title: 'Complete Checklist',
-      description: 'Comprehensive checklist covering every aspect of wedding planning'
-    },
-    {
-      icon: MessageCircle,
-      title: 'AI Wedding Assistant',
-      description: 'Get instant answers to your wedding planning questions'
-    }
+    { icon: Calendar, title: 'Smart Planning Timeline', description: 'Never miss a deadline with our AI-powered wedding timeline' },
+    { icon: DollarSign, title: 'Budget Tracker', description: 'Keep your wedding costs under control' },
+    { icon: CheckSquare, title: 'Complete Checklist', description: 'Comprehensive checklist for every detail' },
+    { icon: MessageCircle, title: 'AI Wedding Assistant', description: 'Get instant answers to your questions' }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50">
-      {/* Navigation */}
       <nav className="relative z-10 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -38,23 +19,16 @@ export default function LandingPage() {
             <span className="text-2xl font-serif font-semibold text-gray-800">Blissful</span>
           </div>
           <div className="flex items-center space-x-4">
-            <button
-              onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'login' })}
-              className="text-gray-600 hover:text-gray-800 transition-colors"
-            >
+            <Link to="/login" className="text-gray-600 hover:text-gray-800 transition-colors">
               Sign In
-            </button>
-            <button
-              onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'signup' })}
-              className="bg-primary-500 text-white px-6 py-2 rounded-full hover:bg-primary-600 transition-colors"
-            >
+            </Link>
+            <Link to="/signup" className="bg-primary-500 text-white px-6 py-2 rounded-full hover:bg-primary-600 transition-colors">
               Get Started
-            </button>
+            </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="relative px-6 py-20">
         <div className="max-w-4xl mx-auto text-center">
           <div className="animate-bounce-subtle inline-block mb-6">
@@ -65,22 +39,12 @@ export default function LandingPage() {
             <span className="text-primary-500 block">Made Simple</span>
           </h1>
           <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto animate-slide-up">
-            Plan your dream wedding with our AI-powered assistant, smart timeline, and comprehensive tools. 
-            From budget tracking to vendor management, we've got you covered.
+            Plan your dream wedding with our AI-powered assistant, smart timeline, and comprehensive tools.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
-            <button
-              onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'signup' })}
-              className="bg-primary-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-600 transform hover:scale-105 transition-all shadow-lg"
-            >
+            <Link to="/signup" className="bg-primary-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-600 transform hover:scale-105 transition-all shadow-lg">
               Start Planning Now
-            </button>
-            <button
-              onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'demo' })}
-              className="border-2 border-primary-500 text-primary-500 px-8 py-4 rounded-full text-lg font-semibold hover:bg-primary-50 transition-colors"
-            >
-              See How It Works
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -120,12 +84,12 @@ export default function LandingPage() {
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join thousands of couples who have planned their perfect day with Blissful
           </p>
-          <button
-            onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'signup' })}
+          <Link
+            to="/signup"
             className="bg-white text-primary-500 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-50 transform hover:scale-105 transition-all shadow-lg"
           >
             Get Started for Free
-          </button>
+          </Link>
         </div>
       </section>
 
