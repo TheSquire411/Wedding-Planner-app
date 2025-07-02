@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, ArrowLeft, Globe, Eye, Settings, Users, BarChart3, Share2, Download, Palette, Edit3, Save, ExternalLink } from 'lucide-react';
+import { Heart, Globe, Eye, Settings, Users, BarChart3, Share2, Download, Palette, Edit3, Save, ExternalLink } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import WebsiteBuilder from './WebsiteBuilder';
 import WebsitePreview from './WebsitePreview';
 import RSVPManager from './RSVPManager';
 import WebsiteAnalytics from './WebsiteAnalytics';
+import BackButton from '../common/BackButton';
 
 interface WebsiteData {
   id: string;
@@ -67,7 +68,7 @@ interface WebsiteData {
 }
 
 export default function WebsitePage() {
-  const { state, dispatch } = useApp();
+  const { state } = useApp();
   const [activeTab, setActiveTab] = useState<'builder' | 'preview' | 'rsvp' | 'analytics'>('builder');
   const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -237,12 +238,7 @@ export default function WebsitePage() {
       <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <button
-              onClick={() => dispatch({ type: 'SET_CURRENT_PAGE', payload: 'dashboard' })}
-              className="p-2 text-gray-600 hover:text-gray-800"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </button>
+            <BackButton />
             <div className="flex items-center space-x-2">
               <Heart className="h-8 w-8 text-primary-500" />
               <span className="text-2xl font-serif font-semibold text-gray-800">Wedding Website</span>
