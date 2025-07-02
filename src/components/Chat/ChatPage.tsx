@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Heart, ArrowLeft, Send, Bot, User, Sparkles } from 'lucide-react';
+import { Heart, Send, Bot, User, Sparkles } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useDeepseek } from '../../hooks/useDeepseek';
 import { ChatMessage } from '../../types';
-import { Link } from 'react-router-dom';
+import BackButton from '../common/BackButton';
 import UpgradeModal from '../common/UpgradeModal';
 import ProBadge from '../common/ProBadge';
 
@@ -164,12 +164,7 @@ export default function ChatPage() {
         <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link
-                to="/dashboard"
-                className="p-2 text-gray-600 hover:text-gray-800"
-              >
-                <ArrowLeft className="h-6 w-6" />
-              </Link>
+              <BackButton />
               <div className="flex items-center space-x-2">
                 <Heart className="h-8 w-8 text-primary-500" />
                 <span className="text-2xl font-serif font-semibold text-gray-800">AI Wedding Assistant</span>
