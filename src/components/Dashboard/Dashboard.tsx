@@ -1,13 +1,18 @@
 import React, { useEffect } from 'react';
-import { Heart, Calendar, DollarSign, CheckSquare, MessageCircle, User, LogOut, Palette, Globe } from 'lucide-react';
+import { Heart, Calendar, DollarSign, CheckSquare, MessageCircle, User, LogOut, Palette, Globe, Users } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { defaultChecklist } from '../../data/checklistData';
 import { defaultBudgetCategories } from '../../data/budgetData';
 import { Link, useNavigate } from 'react-router-dom';
+import { CollaborationProvider, useCollaborationContext } from '../Collaboration/CollaborationProvider';
+import CollaborationToolbar from '../Collaboration/CollaborationToolbar';
+import CollaborationPanel from '../Collaboration/CollaborationPanel';
+import CommentSystem from '../Collaboration/CommentSystem';
 
-export default function Dashboard() {
+function DashboardContent() {
   const { state, dispatch } = useApp();
   const navigate = useNavigate();
+  const { showCollaborationPanel, setShowCollaborationPanel } = useCollaborationContext();
 
   useEffect(() => {
     if (!state.user) return;
@@ -59,6 +64,9 @@ export default function Dashboard() {
             <span className="text-2xl font-serif font-semibold text-gray-800">Blissful</span>
           </div>
           <div className="flex items-center space-x-6">
+            {/* Collaboration Toolbar */}
+            <CollaborationToolbar />
+            
             <div className="flex items-center space-x-2">
               <User className="h-5 w-5 text-gray-600" />
               <span className="text-gray-700">{state.user.name}</span>
@@ -76,17 +84,22 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-gray-800 mb-2">
-            Welcome back, {state.user.name}!
-          </h1>
-          <p className="text-xl text-gray-600">
-            {state.user.weddingDate ? `Your big day is ${new Date(state.user.weddingDate).toLocaleDateString()}` : 'Let\'s continue planning your perfect wedding'}
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-serif font-bold text-gray-800 mb-2">
+                Welcome back, {state.user.name}!
+              </h1>
+              <p className="text-xl text-gray-600">
+                {state.user.weddingDate ? `Your big day is ${new Date(state.user.weddingDate).toLocaleDateString()}` : 'Let\'s continue planning your perfect wedding'}
+              </p>
+            </div>
+            <CommentSystem itemType="dashboard" itemId="main" />
+          </div>
         </div>
 
         {/* Quick Stats */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl p-6 shadow-lg">
+          <div className="bg-white rounded-2xl p-6 shadow-lg relative">
             <div className="flex items-center space-x-3 mb-4">
               <CheckSquare className="h-8 w-8 text-primary-500" />
               <h3 className="text-lg font-semibold text-gray-800">Tasks Complete</h3>
@@ -98,9 +111,12 @@ export default function Dashboard() {
                 style={{ width: `${(completedTasks / state.checklist.length) * 100}%` }}
               ></div>
             </div>
+            <div className="absolute top-4 right-4">
+              <CommentSystem itemType="stats" itemId="tasks" />
+            </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-lg">
+          <div className="bg-white rounded-2xl p-6 shadow-lg relative">
             <div className="flex items-center space-x-3 mb-4">
               <DollarSign className="h-8 w-8 text-sage-400" />
               <h3 className="text-lg font-semibold text-gray-800">Budget Status</h3>
@@ -113,9 +129,12 @@ export default function Dashboard() {
                 style={{ width: `${Math.min((totalSpent / totalBudget) * 100, 100)}%` }}
               ></div>
             </div>
+            <div className="absolute top-4 right-4">
+              <CommentSystem itemType="stats" itemId="budget" />
+            </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-lg">
+          <div className="bg-white rounded-2xl p-6 shadow-lg relative">
             <div className="flex items-center space-x-3 mb-4">
               <Calendar className="h-8 w-8 text-gold-400" />
               <h3 className="text-lg font-semibold text-gray-800">Days Until Wedding</h3>
@@ -124,30 +143,52 @@ export default function Dashboard() {
               {state.user.weddingDate ? Math.max(0, Math.ceil((new Date(state.user.weddingDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))) : '---'}
             </div>
             <div className="text-sm text-gray-600">Stay on track!</div>
+            <div className="absolute top-4 right-4">
+              <CommentSystem itemType="stats" itemId="countdown" />
+            </div>
           </div>
         </div>
         
         {/* Navigation Menu */}
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
           {menuItems.map((item, index) => (
-            <Link
-              key={index}
-              to={item.page}
-              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2 text-left block"
-            >
-              <item.icon className="h-12 w-12 text-primary-500 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{item.label}</h3>
-              <p className="text-gray-600">
-                {item.label === 'Planning' && 'Manage your wedding timeline and checklist'}
-                {item.label === 'Budget' && 'Track expenses and manage your wedding budget'}
-                {item.label === 'Vision Board' && 'Create beautiful mood boards for your wedding'}
-                {item.label === 'Website' && 'Build your wedding website with RSVP system'}
-                {item.label === 'AI Assistant' && 'Get instant answers to your wedding questions'}
-              </p>
-            </Link>
+            <div key={index} className="relative">
+              <Link
+                to={item.page}
+                className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-2 text-left block"
+              >
+                <item.icon className="h-12 w-12 text-primary-500 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">{item.label}</h3>
+                <p className="text-gray-600">
+                  {item.label === 'Planning' && 'Manage your wedding timeline and checklist'}
+                  {item.label === 'Budget' && 'Track expenses and manage your wedding budget'}
+                  {item.label === 'Vision Board' && 'Create beautiful mood boards for your wedding'}
+                  {item.label === 'Website' && 'Build your wedding website with RSVP system'}
+                  {item.label === 'AI Assistant' && 'Get instant answers to your wedding questions'}
+                </p>
+              </Link>
+              <div className="absolute top-4 right-4">
+                <CommentSystem itemType="menu" itemId={item.label.toLowerCase()} />
+              </div>
+            </div>
           ))}
         </div>
       </div>
+
+      {/* Collaboration Panel */}
+      <CollaborationPanel
+        isOpen={showCollaborationPanel}
+        onClose={() => setShowCollaborationPanel(false)}
+        projectId="wedding-project"
+      />
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <CollaborationProvider>
+      <DashboardContent />
+    </CollaborationProvider>
   );
 }
