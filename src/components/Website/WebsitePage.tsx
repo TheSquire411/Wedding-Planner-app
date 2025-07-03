@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Globe, Eye, Settings, Users, BarChart3, Share2, Download, Palette, Edit3, Save, ExternalLink } from 'lucide-react';
+import { Heart, Globe, Eye, Settings, Users, BarChart3, Share2, Download, Palette, Edit3, Save, ExternalLink, Layout, Image, Sparkles } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import WebsiteBuilder from './WebsiteBuilder';
 import WebsitePreview from './WebsitePreview';
 import RSVPManager from './RSVPManager';
 import WebsiteAnalytics from './WebsiteAnalytics';
+import TemplateGallery from './TemplateGallery';
+import AdvancedCustomizer from './AdvancedCustomizer';
+import SectionBuilder from './SectionBuilder';
 import BackButton from '../common/BackButton';
 
 interface WebsiteData {
   id: string;
   url: string;
   isPublished: boolean;
+  template: any;
   theme: {
     colors: string[];
     fonts: {
@@ -48,6 +52,8 @@ interface WebsiteData {
       parking: string;
     };
   };
+  sections: any[];
+  customizations: any;
   rsvp: {
     enabled: boolean;
     deadline: string;
@@ -69,8 +75,9 @@ interface WebsiteData {
 
 export default function WebsitePage() {
   const { state } = useApp();
-  const [activeTab, setActiveTab] = useState<'builder' | 'preview' | 'rsvp' | 'analytics'>('builder');
+  const [activeTab, setActiveTab] = useState<'templates' | 'builder' | 'sections' | 'customizer' | 'preview' | 'rsvp' | 'analytics'>('templates');
   const [websiteData, setWebsiteData] = useState<WebsiteData | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
 
@@ -88,6 +95,7 @@ export default function WebsitePage() {
       id: Date.now().toString(),
       url: `${state.user.name.toLowerCase().replace(/\s+/g, '')}-wedding.blissful.com`,
       isPublished: false,
+      template: null,
       theme: {
         colors: state.user.styleProfile?.colors || ['#F8BBD9', '#D4AF37'],
         fonts: {
@@ -124,6 +132,8 @@ export default function WebsitePage() {
           parking: ''
         }
       },
+      sections: [],
+      customizations: {},
       rsvp: {
         enabled: true,
         deadline: '',
@@ -158,6 +168,22 @@ export default function WebsitePage() {
     };
 
     setWebsiteData(initialWebsite);
+  };
+
+  const handleTemplateSelect = (template: any) => {
+    setSelectedTemplate(template);
+    if (websiteData) {
+      setWebsiteData({
+        ...websiteData,
+        template,
+        theme: {
+          ...websiteData.theme,
+          colors: template.colors,
+          style: template.category
+        }
+      });
+    }
+    setActiveTab('builder');
   };
 
   const generateOurStory = async (style: 'romantic' | 'casual' | 'formal') => {
@@ -241,7 +267,7 @@ export default function WebsitePage() {
             <BackButton />
             <div className="flex items-center space-x-2">
               <Heart className="h-8 w-8 text-primary-500" />
-              <span className="text-2xl font-serif font-semibold text-gray-800">Wedding Website</span>
+              <span className="text-2xl font-serif font-semibold text-gray-800">Wedding Website Studio</span>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -276,8 +302,8 @@ export default function WebsitePage() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-gray-800 mb-4">Your Wedding Website</h1>
-          <p className="text-xl text-gray-600">Create a beautiful website for your guests with RSVP management</p>
+          <h1 className="text-4xl font-serif font-bold text-gray-800 mb-4">Create Your Perfect Wedding Website</h1>
+          <p className="text-xl text-gray-600">Design a beautiful, personalized website that captures your love story</p>
         </div>
 
         {/* Quick Stats */}
@@ -300,6 +326,16 @@ export default function WebsitePage() {
 
           <div className="bg-white rounded-2xl p-6 shadow-lg">
             <div className="flex items-center space-x-3 mb-2">
+              <Layout className="h-6 w-6 text-purple-500" />
+              <h3 className="font-semibold text-gray-800">Template</h3>
+            </div>
+            <div className="text-lg font-semibold text-gray-800">
+              {selectedTemplate ? selectedTemplate.name : 'Not Selected'}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className="flex items-center space-x-3 mb-2">
               <Globe className="h-6 w-6 text-primary-500" />
               <h3 className="font-semibold text-gray-800">Status</h3>
             </div>
@@ -311,32 +347,25 @@ export default function WebsitePage() {
               )}
             </div>
           </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-lg">
-            <div className="flex items-center space-x-3 mb-2">
-              <Settings className="h-6 w-6 text-gray-500" />
-              <h3 className="font-semibold text-gray-800">Last Updated</h3>
-            </div>
-            <div className="text-sm text-gray-600">
-              {websiteData.analytics.lastUpdated.toLocaleDateString()}
-            </div>
-          </div>
         </div>
 
         {/* Tabs */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="border-b">
-            <div className="flex space-x-8 px-6">
+            <div className="flex space-x-8 px-6 overflow-x-auto">
               {[
-                { key: 'builder', label: 'Website Builder', icon: Edit3 },
+                { key: 'templates', label: 'Templates', icon: Layout },
+                { key: 'builder', label: 'Content', icon: Edit3 },
+                { key: 'sections', label: 'Sections', icon: Image },
+                { key: 'customizer', label: 'Customize', icon: Palette },
                 { key: 'preview', label: 'Preview', icon: Eye },
-                { key: 'rsvp', label: 'RSVP Manager', icon: Users },
+                { key: 'rsvp', label: 'RSVP', icon: Users },
                 { key: 'analytics', label: 'Analytics', icon: BarChart3 }
               ].map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key as any)}
-                  className={`flex items-center space-x-2 py-4 border-b-2 transition-colors ${
+                  className={`flex items-center space-x-2 py-4 border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === key
                       ? 'border-primary-500 text-primary-600'
                       : 'border-transparent text-gray-600 hover:text-gray-800'
@@ -351,12 +380,35 @@ export default function WebsitePage() {
 
           {/* Tab Content */}
           <div className="p-6">
+            {activeTab === 'templates' && (
+              <TemplateGallery
+                onSelectTemplate={handleTemplateSelect}
+                selectedTemplate={selectedTemplate}
+              />
+            )}
+
             {activeTab === 'builder' && (
               <WebsiteBuilder
                 websiteData={websiteData}
                 onUpdate={updateWebsiteData}
                 onGenerateStory={generateOurStory}
                 isGenerating={isGenerating}
+              />
+            )}
+
+            {activeTab === 'sections' && (
+              <SectionBuilder
+                sections={websiteData.sections}
+                onUpdateSections={(sections) => updateWebsiteData({ sections })}
+                inspirationImages={state.inspirationImages}
+              />
+            )}
+
+            {activeTab === 'customizer' && selectedTemplate && (
+              <AdvancedCustomizer
+                websiteData={websiteData}
+                onUpdate={updateWebsiteData}
+                selectedTemplate={selectedTemplate}
               />
             )}
 
@@ -382,6 +434,43 @@ export default function WebsitePage() {
             )}
           </div>
         </div>
+
+        {/* Getting Started Guide */}
+        {!selectedTemplate && activeTab === 'templates' && (
+          <div className="mt-8 bg-gradient-to-r from-primary-50 to-sage-50 rounded-2xl p-8">
+            <div className="text-center">
+              <Sparkles className="h-12 w-12 text-primary-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-serif font-bold text-gray-800 mb-4">
+                Create Your Dream Wedding Website
+              </h2>
+              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                Follow these simple steps to create a stunning wedding website that perfectly captures your love story and provides all the information your guests need.
+              </p>
+              <div className="grid md:grid-cols-4 gap-6 text-left">
+                <div className="bg-white rounded-lg p-6 shadow-md">
+                  <div className="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center font-bold mb-3">1</div>
+                  <h3 className="font-semibold text-gray-800 mb-2">Choose Template</h3>
+                  <p className="text-sm text-gray-600">Select from 100+ professionally designed templates</p>
+                </div>
+                <div className="bg-white rounded-lg p-6 shadow-md">
+                  <div className="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center font-bold mb-3">2</div>
+                  <h3 className="font-semibold text-gray-800 mb-2">Add Content</h3>
+                  <p className="text-sm text-gray-600">Customize with your story, photos, and wedding details</p>
+                </div>
+                <div className="bg-white rounded-lg p-6 shadow-md">
+                  <div className="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center font-bold mb-3">3</div>
+                  <h3 className="font-semibold text-gray-800 mb-2">Customize Design</h3>
+                  <p className="text-sm text-gray-600">Personalize colors, fonts, and layout to match your style</p>
+                </div>
+                <div className="bg-white rounded-lg p-6 shadow-md">
+                  <div className="w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center font-bold mb-3">4</div>
+                  <h3 className="font-semibold text-gray-800 mb-2">Publish & Share</h3>
+                  <p className="text-sm text-gray-600">Go live and share your beautiful website with guests</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
