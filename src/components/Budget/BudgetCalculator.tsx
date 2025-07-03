@@ -41,20 +41,26 @@ export default function BudgetCalculator({ onSaveBudget }: BudgetCalculatorProps
   ];
 
   const locationMultipliers: { [key: string]: number } = {
-    'New York, NY': 1.8,
-    'Los Angeles, CA': 1.6,
-    'San Francisco, CA': 1.7,
-    'Chicago, IL': 1.3,
-    'Miami, FL': 1.4,
-    'Austin, TX': 1.2,
-    'Denver, CO': 1.1,
-    'Atlanta, GA': 1.0,
-    'Nashville, TN': 1.0,
-    'Phoenix, AZ': 0.9,
-    'Other Major City': 1.2,
-    'Suburban Area': 0.9,
-    'Rural Area': 0.7
+    'NSW': 1.4, // New South Wales - Sydney premium
+    'VIC': 1.3, // Victoria - Melbourne premium
+    'QLD': 1.1, // Queensland - Brisbane/Gold Coast
+    'WA': 1.2, // Western Australia - Perth
+    'SA': 1.0, // South Australia - Adelaide
+    'ACT': 1.3, // Australian Capital Territory - Canberra
+    'NT': 0.9, // Northern Territory - Darwin
+    'TAS': 0.8  // Tasmania - Hobart
   };
+
+  const locationOptions = [
+    { value: 'NSW', label: 'New South Wales (NSW)' },
+    { value: 'VIC', label: 'Victoria (VIC)' },
+    { value: 'QLD', label: 'Queensland (QLD)' },
+    { value: 'SA', label: 'South Australia (SA)' },
+    { value: 'WA', label: 'Western Australia (WA)' },
+    { value: 'NT', label: 'Northern Territory (NT)' },
+    { value: 'ACT', label: 'Australian Capital Territory (ACT)' },
+    { value: 'TAS', label: 'Tasmania (TAS)' }
+  ];
 
   const getStyleMultiplier = (style: string): number => {
     const multipliers: { [key: string]: number } = {
@@ -68,6 +74,11 @@ export default function BudgetCalculator({ onSaveBudget }: BudgetCalculatorProps
       'Rustic & Bohemian': 0.8
     };
     return multipliers[style] || 1.0;
+  };
+
+  const getLocationName = (code: string): string => {
+    const location = locationOptions.find(loc => loc.value === code);
+    return location ? location.label : code;
   };
 
   const generateBudgetBreakdown = (): BudgetBreakdown[] => {
@@ -283,15 +294,17 @@ export default function BudgetCalculator({ onSaveBudget }: BudgetCalculatorProps
               onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
-              <option value="">Select location</option>
-              {Object.keys(locationMultipliers).map(location => (
-                <option key={location} value={location}>{location}</option>
+              <option value="">Select state/territory</option>
+              {locationOptions.map(location => (
+                <option key={location.value} value={location.value}>
+                  {location.label}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Total Budget</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Total Budget (AUD)</label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
@@ -312,7 +325,7 @@ export default function BudgetCalculator({ onSaveBudget }: BudgetCalculatorProps
               onChange={(e) => setFormData(prev => ({ ...prev, mustHaves: e.target.value }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               rows={2}
-              placeholder="e.g., live band, premium photography, destination venue..."
+              placeholder="e.g., live band, premium photography, waterfront venue..."
             />
           </div>
 
@@ -347,18 +360,18 @@ export default function BudgetCalculator({ onSaveBudget }: BudgetCalculatorProps
             <div className="bg-white rounded-lg p-6 shadow-md text-center">
               <DollarSign className="h-8 w-8 text-green-500 mx-auto mb-2" />
               <div className="text-2xl font-bold text-gray-800">${getTotalAmount().toLocaleString()}</div>
-              <div className="text-sm text-gray-600">Total Estimated Cost</div>
+              <div className="text-sm text-gray-600">Total Estimated Cost (AUD)</div>
             </div>
 
             <div className="bg-white rounded-lg p-6 shadow-md text-center">
               <Users className="h-8 w-8 text-blue-500 mx-auto mb-2" />
               <div className="text-2xl font-bold text-gray-800">${getPerPersonCost()}</div>
-              <div className="text-sm text-gray-600">Cost Per Guest</div>
+              <div className="text-sm text-gray-600">Cost Per Guest (AUD)</div>
             </div>
 
             <div className="bg-white rounded-lg p-6 shadow-md text-center">
               <MapPin className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-              <div className="text-lg font-bold text-gray-800">{formData.location}</div>
+              <div className="text-lg font-bold text-gray-800">{getLocationName(formData.location)}</div>
               <div className="text-sm text-gray-600">Location Factor</div>
             </div>
 
@@ -466,11 +479,12 @@ export default function BudgetCalculator({ onSaveBudget }: BudgetCalculatorProps
               <div>
                 <h4 className="font-semibold text-yellow-800 mb-2">Important Notes:</h4>
                 <ul className="text-sm text-yellow-700 space-y-1">
-                  <li>• Prices are estimates based on current market rates in {formData.location}</li>
+                  <li>• Prices are estimates based on current market rates in {getLocationName(formData.location)}</li>
                   <li>• Actual costs may vary significantly based on specific vendors and choices</li>
                   <li>• Consider getting quotes from multiple vendors for accurate pricing</li>
                   <li>• The emergency buffer helps cover unexpected expenses and price changes</li>
                   <li>• {formData.style} style typically {getStyleMultiplier(formData.style) > 1 ? 'increases' : 'decreases'} costs by {Math.abs((getStyleMultiplier(formData.style) - 1) * 100).toFixed(0)}%</li>
+                  <li>• All amounts are displayed in Australian Dollars (AUD)</li>
                 </ul>
               </div>
             </div>
