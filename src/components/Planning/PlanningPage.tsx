@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Heart, Calendar, CheckCircle2, Circle, AlertCircle, Clock, Camera } from 'lucide-react';
+import { Heart, Calendar, CheckCircle2, Circle, AlertCircle, Clock, Camera, CalendarDays } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import InspirationGallery from '../Gallery/InspirationGallery';
+import TimelineGenerator from './TimelineGenerator';
 import BackButton from '../common/BackButton';
 
 export default function PlanningPage() {
   const { state, dispatch } = useApp();
   const [filter, setFilter] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'checklist' | 'timeline' | 'inspiration'>('checklist');
 
   const priorityColors = {
     high: 'text-red-600 bg-red-50',
@@ -34,6 +36,12 @@ export default function PlanningPage() {
     return acc;
   }, {} as Record<string, typeof filteredTasks>);
 
+  const handleSaveTimeline = (timeline: any[]) => {
+    // In a real app, this would save the timeline to the backend
+    console.log('Saving timeline:', timeline);
+    alert('Timeline saved successfully!');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sage-50">
       {/* Navigation */}
@@ -52,143 +60,193 @@ export default function PlanningPage() {
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-gray-800 mb-4">Wedding Planning Timeline</h1>
-          <p className="text-xl text-gray-600">Stay organized with your comprehensive wedding checklist</p>
+          <h1 className="text-4xl font-serif font-bold text-gray-800 mb-4">Wedding Planning Hub</h1>
+          <p className="text-xl text-gray-600">Organize your timeline, track progress, and gather inspiration</p>
         </div>
 
-        {/* Inspiration Gallery Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-800 flex items-center">
-                <Camera className="h-6 w-6 mr-2 text-primary-500" />
-                Inspiration Gallery
-              </h3>
-              <p className="text-gray-600 mt-1">Upload and organize photos for each wedding category</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
-            {inspirationCategories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className="group bg-gradient-to-br from-primary-50 to-sage-50 p-4 rounded-xl hover:shadow-md transition-all transform hover:-translate-y-1"
-              >
-                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-primary-100 transition-colors">
-                  <Camera className="h-6 w-6 text-primary-500" />
-                </div>
-                <p className="text-sm font-medium text-gray-700 text-center">{category}</p>
-              </button>
-            ))}
-          </div>
+        {/* Tabs */}
+        <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 mb-8">
+          <button
+            onClick={() => setActiveTab('checklist')}
+            className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-md transition-colors ${
+              activeTab === 'checklist'
+                ? 'bg-white text-primary-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            <span className="font-medium">Checklist</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('timeline')}
+            className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-md transition-colors ${
+              activeTab === 'timeline'
+                ? 'bg-white text-primary-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <CalendarDays className="h-4 w-4" />
+            <span className="font-medium">Timeline Generator</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('inspiration')}
+            className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-md transition-colors ${
+              activeTab === 'inspiration'
+                ? 'bg-white text-primary-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <Camera className="h-4 w-4" />
+            <span className="font-medium">Inspiration Gallery</span>
+          </button>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg mb-8">
-          <div className="flex flex-wrap gap-3">
-            {[
-              { key: 'all', label: 'All Tasks' },
-              { key: 'pending', label: 'Pending' },
-              { key: 'completed', label: 'Completed' },
-              { key: 'high', label: 'High Priority' },
-              { key: 'medium', label: 'Medium Priority' },
-              { key: 'low', label: 'Low Priority' }
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setFilter(key)}
-                className={`px-4 py-2 rounded-full font-medium transition-colors ${
-                  filter === key
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Timeline */}
-        <div className="space-y-8">
-          {Object.entries(groupedTasks).map(([timeframe, tasks]) => (
-            <div key={timeframe} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="bg-gradient-to-r from-primary-500 to-sage-400 px-6 py-4">
-                <h3 className="text-xl font-semibold text-white flex items-center">
-                  <Calendar className="h-6 w-6 mr-2" />
-                  {timeframe}
-                </h3>
+        {/* Tab Content */}
+        {activeTab === 'checklist' && (
+          <div className="space-y-8">
+            {/* Filters */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className="flex flex-wrap gap-3">
+                {[
+                  { key: 'all', label: 'All Tasks' },
+                  { key: 'pending', label: 'Pending' },
+                  { key: 'completed', label: 'Completed' },
+                  { key: 'high', label: 'High Priority' },
+                  { key: 'medium', label: 'Medium Priority' },
+                  { key: 'low', label: 'Low Priority' }
+                ].map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setFilter(key)}
+                    className={`px-4 py-2 rounded-full font-medium transition-colors ${
+                      filter === key
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  {tasks.map(task => (
-                    <div
-                      key={task.id}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        task.completed
-                          ? 'border-green-200 bg-green-50'
-                          : 'border-gray-200 bg-white hover:border-primary-200'
-                      }`}
-                    >
-                      <div className="flex items-start space-x-4">
-                        <button
-                          onClick={() => dispatch({ type: 'TOGGLE_CHECKLIST_ITEM', payload: task.id })}
-                          className="mt-1"
+            </div>
+
+            {/* Timeline */}
+            <div className="space-y-8">
+              {Object.entries(groupedTasks).map(([timeframe, tasks]) => (
+                <div key={timeframe} className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                  <div className="bg-gradient-to-r from-primary-500 to-sage-400 px-6 py-4">
+                    <h3 className="text-xl font-semibold text-white flex items-center">
+                      <Calendar className="h-6 w-6 mr-2" />
+                      {timeframe}
+                    </h3>
+                  </div>
+                  <div className="p-6">
+                    <div className="space-y-4">
+                      {tasks.map(task => (
+                        <div
+                          key={task.id}
+                          className={`p-4 rounded-lg border-2 transition-all ${
+                            task.completed
+                              ? 'border-green-200 bg-green-50'
+                              : 'border-gray-200 bg-white hover:border-primary-200'
+                          }`}
                         >
-                          {task.completed ? (
-                            <CheckCircle2 className="h-6 w-6 text-green-500" />
-                          ) : (
-                            <Circle className="h-6 w-6 text-gray-400 hover:text-primary-500" />
-                          )}
-                        </button>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className={`text-lg font-semibold ${task.completed ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
-                              {task.title}
-                            </h4>
-                            <div className="flex items-center space-x-2">
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${priorityColors[task.priority]}`}>
-                                {task.priority} priority
-                              </span>
-                              <span className="text-sm text-gray-500 flex items-center">
-                                <Clock className="h-4 w-4 mr-1" />
-                                {task.dueDate}
-                              </span>
+                          <div className="flex items-start space-x-4">
+                            <button
+                              onClick={() => dispatch({ type: 'TOGGLE_CHECKLIST_ITEM', payload: task.id })}
+                              className="mt-1"
+                            >
+                              {task.completed ? (
+                                <CheckCircle2 className="h-6 w-6 text-green-500" />
+                              ) : (
+                                <Circle className="h-6 w-6 text-gray-400 hover:text-primary-500" />
+                              )}
+                            </button>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className={`text-lg font-semibold ${task.completed ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
+                                  {task.title}
+                                </h4>
+                                <div className="flex items-center space-x-2">
+                                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${priorityColors[task.priority]}`}>
+                                    {task.priority} priority
+                                  </span>
+                                  <span className="text-sm text-gray-500 flex items-center">
+                                    <Clock className="h-4 w-4 mr-1" />
+                                    {task.dueDate}
+                                  </span>
+                                </div>
+                              </div>
+                              <p className={`text-gray-600 ${task.completed ? 'line-through' : ''}`}>
+                                {task.description}
+                              </p>
+                              <div className="mt-2">
+                                <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                                  {task.category}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                          <p className={`text-gray-600 ${task.completed ? 'line-through' : ''}`}>
-                            {task.description}
-                          </p>
-                          <div className="mt-2">
-                            <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                              {task.category}
-                            </span>
-                          </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {filteredTasks.length === 0 && (
-          <div className="bg-white rounded-2xl p-12 shadow-lg text-center">
-            <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No tasks found</h3>
-            <p className="text-gray-500">Try adjusting your filters to see more tasks.</p>
+            {filteredTasks.length === 0 && (
+              <div className="bg-white rounded-2xl p-12 shadow-lg text-center">
+                <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No tasks found</h3>
+                <p className="text-gray-500">Try adjusting your filters to see more tasks.</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Inspiration Gallery Modal */}
-        {selectedCategory && (
-          <InspirationGallery
-            category={selectedCategory}
-            isOpen={!!selectedCategory}
-            onClose={() => setSelectedCategory(null)}
-          />
+        {activeTab === 'timeline' && (
+          <TimelineGenerator onSaveTimeline={handleSaveTimeline} />
+        )}
+
+        {activeTab === 'inspiration' && (
+          <div className="space-y-8">
+            {/* Inspiration Gallery Section */}
+            <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 flex items-center">
+                    <Camera className="h-6 w-6 mr-2 text-primary-500" />
+                    Inspiration Gallery
+                  </h3>
+                  <p className="text-gray-600 mt-1">Upload and organize photos for each wedding category</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+                {inspirationCategories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className="group bg-gradient-to-br from-primary-50 to-sage-50 p-4 rounded-xl hover:shadow-md transition-all transform hover:-translate-y-1"
+                  >
+                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-primary-100 transition-colors">
+                      <Camera className="h-6 w-6 text-primary-500" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-700 text-center">{category}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Inspiration Gallery Modal */}
+            {selectedCategory && (
+              <InspirationGallery
+                category={selectedCategory}
+                isOpen={!!selectedCategory}
+                onClose={() => setSelectedCategory(null)}
+              />
+            )}
+          </div>
         )}
       </div>
     </div>
